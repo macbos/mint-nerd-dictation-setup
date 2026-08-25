@@ -35,8 +35,7 @@ Clone this repository and run the installer:
 ```bash
 git clone https://github.com/macbos/mint-nerd-dictation-setup.git
 cd mint-nerd-dictation-setup
-chmod +x install.sh
-./install.sh
+bash install.sh
 ```
 
 The installer is designed to be safe to run again. Existing correct components are reused and the upstream nerd-dictation checkout is updated when possible.
@@ -79,7 +78,7 @@ Pull the latest version of this repository and run the installer again:
 
 ```bash
 git pull
-./install.sh
+bash install.sh
 ```
 
 The installer also attempts a fast-forward update of the upstream nerd-dictation checkout.
@@ -89,7 +88,7 @@ The installer also attempts a fast-forward update of the upstream nerd-dictation
 Run:
 
 ```bash
-./uninstall.sh
+bash uninstall.sh
 ```
 
 By default this removes the files installed by this setup, including the downloaded Dutch language model and the local nerd-dictation checkout. It does not remove general system packages such as `git`, `xdotool`, or `yad`.
