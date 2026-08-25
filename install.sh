@@ -16,6 +16,15 @@ log() {
     printf '\n==> %s\n' "$1"
 }
 
+ok() {
+    printf '  [OK] %s\n' "$1"
+}
+
+fail() {
+    printf '  [FOUT] %s\n' "$1" >&2
+    exit 1
+}
+
 if [ "${XDG_SESSION_TYPE:-}" != "x11" ]; then
     echo "Waarschuwing: deze installer is bedoeld voor een X11-sessie."
     echo "Huidige sessie: ${XDG_SESSION_TYPE:-onbekend}"
@@ -71,10 +80,29 @@ install -m 0755 "$REPO_ROOT/bin/dictation-toggle" "$BIN_DIR/dictation-toggle"
 install -m 0644 "$REPO_ROOT/assets/microphone-red.svg" "$DATA_DIR/microphone-red.svg"
 
 log "Installatie controleren"
-"$BIN_DIR/nerd-dictation" --help >/dev/null
-xdotool --version >/dev/null
-yad --version >/dev/null
-pw-cat --version >/dev/null 2>&1 || true
+
+command -v git >/dev/null 2>&1 && ok "git gevonden" || fail "git ontbreekt"
+command -v xdotool >/dev/null 2>&1 && ok "xdotool gevonden" || fail "xdotool ontbreekt"
+command -v yad >/dev/null 2>&1 && ok "yad gevonden" || fail "yad ontbreekt"
+command -v pw-cat >/dev/null 2>&1 && ok "pw-cat gevonden" || fail "pw-cat ontbreekt"
+
+[ -x "$BIN_DIR/nerd-dictation" ] && ok "nerd-dictation is uitvoerbaar" || fail "nerd-dictation ontbreekt"
+[ -x "$BIN_DIR/dictation-toggle" ] && ok "dictation-toggle is uitvoerbaar" || fail "dictation-toggle ontbreekt"
+[ -f "$DATA_DIR/microphone-red.svg" ] && ok "rood microfoonicoon gevonden" || fail "microfoonicoon ontbreekt"
+
+if [ -d "$MODEL_DIR/am" ] && [ -d "$MODEL_DIR/conf" ] && [ -d "$MODEL_DIR/graph" ]; then
+    ok "Nederlands Vosk-model gevonden"
+else
+    fail "Nederlands Vosk-model is onvolledig"
+fi
+
+"$VENV_DIR/bin/python" -c 'import vosk' >/dev/null 2>&1 \
+    && ok "Python kan Vosk importeren" \
+    || fail "Vosk kan niet worden geïmporteerd"
+
+"$BIN_DIR/nerd-dictation" --help >/dev/null 2>&1 \
+    && ok "nerd-dictation start correct" \
+    || fail "nerd-dictation start niet correct"
 
 cat <<EOF
 
