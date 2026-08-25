@@ -13,6 +13,7 @@ This setup installs nerd-dictation in an isolated Python virtual environment, do
 - X11 typing via `xdotool`
 - A `dictation-toggle` command
 - A theme-independent red microphone tray icon via `yad`
+- Optionally a Cinnamon shortcut on `Ctrl+Alt+D`
 
 The system Python installation is not modified with `pip`.
 
@@ -40,19 +41,29 @@ bash install.sh
 
 The installer is designed to be safe to run again. Existing correct components are reused and the upstream nerd-dictation checkout is updated when possible.
 
-## Configure the Cinnamon shortcut
+Near the end, the installer asks:
 
-After installation, open:
+```text
+Wil je Ctrl+Alt+D automatisch instellen als dicteersneltoets? [j/N]
+```
+
+Choose `j` to let the installer configure the Cinnamon shortcut. Existing custom shortcuts are preserved. If `Ctrl+Alt+D` is already used by another custom shortcut, nothing is overwritten and the installer tells you to resolve the conflict manually.
+
+If an existing custom shortcut already runs this setup's `dictation-toggle`, the installer reuses that entry instead of adding a duplicate.
+
+## Manual Cinnamon shortcut setup
+
+If you choose not to configure it automatically, open:
 
 **System Settings → Keyboard → Shortcuts → Custom Shortcuts**
 
-Create one shortcut, for example:
+Create one shortcut:
 
 - Name: `Dictation toggle`
-- Command: `bash -lc '$HOME/.local/bin/dictation-toggle'`
+- Command: `~/.local/bin/dictation-toggle`
 - Shortcut: `Ctrl+Alt+D`
 
-Usage:
+## Usage
 
 1. Place the cursor in a text field.
 2. Press `Ctrl+Alt+D` to start dictation.
