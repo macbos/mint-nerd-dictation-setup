@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -u
+
+NERD="$HOME/.local/bin/nerd-dictation"
+ICON="$HOME/.local/share/nerd-dictation/microphone-red.svg"
+RUNDIR="${XDG_RUNTIME_DIR:-/tmp}"
+PIDFILE="$RUNDIR/nerd-dictation.pid"
+TRAYFILE="$RUNDIR/nerd-dictation-tray.pid"
+
+cleanup() {
+    if [ -f "$TRAYFILE" ]; then
+        tray_pid="$(cat "$TRAYFILE")"
+        kill "$tray_pid" 2>/dev/null || true
+        rm -f "$TRAYFILE"
+    fi
+    rm -f "$PIDFILE"
+}
+
+# Stop dictation when the recorded worker is still alive.
+if [ -f "$PIDFILE" ]; then
+    pid="$(cat "$PIDFILE")"
+    if kill -0 "$pid" 2>/dev/null; then
+        "$NERD" end || true
+        exit 0
+    fi
+    cleanup
+fi
+
+# Recover gracefully if nerd-dictation is active but the pid file is stale/missing.
+if pgrep -u "$USER" -f "$NERD begin" >/dev/null 2>&1; then
+    "$NERD" end || true
+    cleanup
+    exit 0
+fi
+
+# Show a theme-independent red microphone while dictation is active.
+yad --notification \
+    --image="$ICON" \
+    --text="Dicteren actief — druk opnieuw op de sneltoets om te stoppen" &
+echo $! > "$TRAYFILE"
+
+# Start dictation in the background. Cleanup also removes the tray icon when
+# nerd-dictation ends for another reason.
+(
+    trap cleanup EXIT
+    "$NERD" begin --input=PW-CAT
+) >/dev/null 2>&1 &
+echo $! > "$PIDFILE"
